@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ConFinder</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="convention_search_url">http://www.januscole.com</string>
+    <string name="get_cons">GetCons</string>
+    <string name="tilda_delimiter">~</string>
+</resources>

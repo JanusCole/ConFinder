@@ -47,26 +47,10 @@ public class RetrofitTest {
 
         RetrofitConsFromWeb retrofitConsFromWeb = new RetrofitConsFromWeb(mockWebServer.url("").toString());
         List<Convention> conventionsFromWeb = retrofitConsFromWeb.getConventionsFromWeb();
-//        Convention oneConvention = conventionsFromWeb.get(0);
 
         assertEquals(null, conventionsFromWeb);
 
     }
-
-//    @Test
-//    public void testRetrofitWithBadResponse() throws Exception {
-//
-//        MockWebServer mockWebServer = new MockWebServer();
-//
-//        mockWebServer.enqueue(new MockResponse().setBody("{symbol:@context"));
-//
-//        RetrofitConsFromWeb retrofitConsFromWeb = new RetrofitConsFromWeb(mockWebServer.url("").toString());
-//        List<Convention> conventionsFromWeb = retrofitConsFromWeb.getConventionsFromWeb();
-////        Convention oneConvention = conventionsFromWeb.get(0);
-//
-//        assertEquals(null, conventionsFromWeb);
-//
-//    }
 
     @Test
     public void testRetrofitWithGoodResponse() throws Exception {

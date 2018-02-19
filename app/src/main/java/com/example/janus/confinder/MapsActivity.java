@@ -148,19 +148,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Convention convention = (Convention) msg.obj;
 
-// TODO Improve this. It seemed like a clever idea to pass multiple fields through the marker
-// TODO by creating a delimited string. But in retrospect, it needs a more elegant solution.
-                StringBuilder conventionInfo = new StringBuilder();
-
-                conventionInfo.append(convention.getName());
-                conventionInfo.append(getString(R.string.tilda_delimiter));
-                conventionInfo.append(convention.getStartDate());
-                conventionInfo.append(getString(R.string.tilda_delimiter));
-                conventionInfo.append(convention.getAddress());
-
                 mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(convention.getLatitude(), convention.getLongitude()))
-                        .title(conventionInfo.toString())
+                        .title(convention.getName())
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.comicconicon))
                         .snippet(convention.getWebsite()));
 
@@ -194,38 +184,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     View view = getLayoutInflater().inflate(R.layout.convention_info, null);
 
-                    String conventionArray [] = marker.getTitle().split(getString(R.string.tilda_delimiter)); // Tilda delimited
-
                     ImageView iconImage = (ImageView) view.findViewById(R.id.iconImageView);
                     Bitmap conIcon = BitmapFactory.decodeResource(getResources(), R.drawable.comicconicon);
                     iconImage.setImageBitmap(conIcon);
 
                     TextView conventionName = (TextView) view.findViewById(R.id.nameTextView);
-                    conventionName.setText(conventionArray[0]); // Convention Name
-
-                    try {
-
-                        SimpleDateFormat mmdformat = new SimpleDateFormat("yyyy-MM-dd");
-                        Date date1 = mmdformat.parse(conventionArray[1]); // Convention Date
-                        SimpleDateFormat mmmdformat = new SimpleDateFormat("MMMM dd, yyyy");
-
-                        TextView conventionStartDate = (TextView) view.findViewById(R.id.startDateTextView);
-                        conventionStartDate.setText(mmmdformat.format(date1));
-
-                    } catch (ParseException e) {
-
-// Default to input layout on date formatting error
-                        TextView conventionStartDate = (TextView) view.findViewById(R.id.startDateTextView);
-                        conventionStartDate.setText(conventionArray[1]); // Convention Date
-                        Log.d("DATE FORMAT ERROR" , e.getMessage());
-
-                    }
-
-                    TextView conventionVenue = (TextView) view.findViewById(R.id.venueTextView);
-                    conventionVenue.setText(marker.getTitle());
-
-                    TextView conventionAddress = (TextView) view.findViewById(R.id.addressTextView);
-                    conventionAddress.setText(conventionArray[2]); // Convention Address
+                    conventionName.setText(marker.getTitle());
 
                     return view;
                 }

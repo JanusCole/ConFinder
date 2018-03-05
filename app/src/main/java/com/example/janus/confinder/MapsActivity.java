@@ -1,11 +1,8 @@
 package com.example.janus.confinder;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Geocoder;
 import android.net.Uri;
 import android.os.Handler;
@@ -16,7 +13,6 @@ import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,9 +29,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+// This app reads in data for upcoming Comic Cons across the world and displays them on a Google Maps API.
+// Then it zooms in on the user's location (currently hard coded to Boston because I live near Boston : -)
+// It gets the Comic Con data from a REST API that is consumed using Retrofit.
 
 // TODO Get Location From User
 
@@ -140,6 +136,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+// This handles results from the REST call. The thread will send back a null object when it is done.
+// So that triggers the zoom functionality. Otherwise, take the geolocation and set a map marker. The thread sends
+// back one Convention object at a time.
     Handler handleConAddresses = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -195,6 +194,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             });
 
+// This code sends the user to a website for the Convention when the map marker is clicked
             mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick(Marker marker) {

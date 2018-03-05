@@ -49,14 +49,15 @@ public class GetCons implements Runnable {
                         }
 
                     } catch (IOException e) {
-
+// TODO Need to handle Retrofit errors elegantly. At present, the map will be blank if there is an IO Error.
+// TODO That works, but it would be better with a more helpful error message.
                     }
 
 
                 }
             }
 
-
+// Sends back an empty Convention object o indicate it has completed
             Message lastConvention = Message.obtain();
             lastConvention.obj = null;
             mainThreadHandler.sendMessage(lastConvention);

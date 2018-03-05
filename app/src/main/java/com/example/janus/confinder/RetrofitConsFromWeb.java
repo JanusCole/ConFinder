@@ -36,7 +36,8 @@ public class RetrofitConsFromWeb implements GetConventions {
             conventionList =  conventionResults.execute().body();
 
         } catch (IOException e) {
-            Log.d("I/O ERROR", "Retrofit " + e.getMessage());
+// TODO Need to handle Retrofit errors elegantly. At present, the map will be blank if there is an IO Error.
+// TODO That works-ish, but it would be better with a more helpful error message.
         }
 
         return conventionList;

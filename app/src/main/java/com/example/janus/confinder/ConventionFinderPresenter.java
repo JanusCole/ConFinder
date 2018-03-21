@@ -2,31 +2,41 @@ package com.example.janus.confinder;
 
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.Bundle;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
-public class GetCons implements Runnable {
+public class ConventionFinderPresenter implements ConventionFinderContract.Presenter {
 
-        Handler mainThreadHandler;
+        ConventionFinderContract.View conventionFinderView;
         Geocoder geocoder;
         GetConventions consFromWeb;
 
-        public GetCons(Handler mainThreadHandler, GetConventions consFromWeb, Geocoder geocoder) {
-            this.mainThreadHandler = mainThreadHandler;
+        public ConventionFinderPresenter(ConventionFinderContract.View conventionFinderView, GetConventions consFromWeb, Geocoder geocoder) {
+            this.conventionFinderView = conventionFinderView;
             this.consFromWeb = consFromWeb;
             this.geocoder = geocoder;
         }
 
+        public void getConventions() {
+
+            new SearchForConventions().execute();
+
+        }
+
+    private class SearchForConventions extends AsyncTask<Void, Convention, Void> {
         @Override
-        public void run() {
+        protected void onProgressUpdate(Convention... values) {
+            conventionFinderView.mapConvention(values[0]);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
 
             Calendar calendar = Calendar.getInstance();
             SimpleDateFormat mdformat = new SimpleDateFormat("yyyy-MM-dd ");
@@ -35,7 +45,6 @@ public class GetCons implements Runnable {
             for (Convention convention: consFromWeb.getConventionsFromWeb()) {
 
                 if (convention.getStartDate().compareTo(strDate) > 0) {
-                    Message returnConvention = Message.obtain();
 
                     try {
                         List<Address> addresses = geocoder.getFromLocationName(convention.getAddress(), 1);
@@ -44,22 +53,20 @@ public class GetCons implements Runnable {
                             convention.setLongitude(addresses.get(0).getLongitude());
                             convention.setLatitude(addresses.get(0).getLatitude());
 
-                            returnConvention.obj = convention;
-                            mainThreadHandler.sendMessage(returnConvention);
+                            publishProgress(convention);
                         }
 
                     } catch (IOException e) {
-// TODO Need to handle Retrofit errors elegantly. At present, the map will be blank if there is an IO Error.
-// TODO That works, but it would be better with a more helpful error message.
                     }
-
-
                 }
             }
+            return null;
+        }
 
-// Sends back an empty Convention object o indicate it has completed
-            Message lastConvention = Message.obtain();
-            lastConvention.obj = null;
-            mainThreadHandler.sendMessage(lastConvention);
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            conventionFinderView.completeMap();
+        }
+    }
 
-        }}
+}

@@ -38,14 +38,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 // TODO Either move the Retrofit call to a separate HandlerThread and then call the Geocoder in a different HandlerThread or
 // TODO set up the Retrofit call as an async and then call Gecoder in a HandlerThread from the callback. Undecided which way to go.
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements ConventionFinderContract.View, OnMapReadyCallback  {
+
+    ConventionFinderContract.Presenter conventionFinderPresenter;
 
     private GoogleMap mMap;
 
     private AlertDialog networkActivityDialog;
-
-    private HandlerThread getConsHandlerThread;
-    private Handler getConsHandlerThreadHandler;
 
     // TODO Change to get user location dynamically
     private LatLng userLocation = new LatLng(42.36793719999999,-71.076245); // Boston Coordinates
@@ -56,15 +55,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        conventionFinderPresenter = new ConventionFinderPresenter(this,
+                new RetrofitConsFromWeb(getString(R.string.convention_search_url)),
+                new Geocoder(this));
+
         setupStartSearchDialog();
 
 // Set up the dialog box for network activity
         setupNetworkActivityDialog();
-
-        getConsHandlerThread = new HandlerThread(getString(R.string.get_cons));
-        getConsHandlerThread.start();
-
-        getConsHandlerThreadHandler = new Handler(getConsHandlerThread.getLooper());
 
 // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -78,15 +76,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         networkActivityDialog.show();
 
-        EspressoIdlingResource.increment();
-
         mMap.clear();
         mMap.moveCamera(CameraUpdateFactory.newLatLng(USA_LOCATION));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(USA_LOCATION, 4.0f));
 
-        getConsHandlerThreadHandler.post(new GetCons(handleConAddresses,
-                new RetrofitConsFromWeb(getString(R.string.convention_search_url)),
-                new Geocoder(this)));
+        conventionFinderPresenter.getConventions();
 
     }
 
@@ -139,6 +133,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 // This handles results from the REST call. The thread will send back a null object when it is done.
 // So that triggers the zoom functionality. Otherwise, take the geolocation and set a map marker. The thread sends
 // back one Convention object at a time.
+/*
     Handler handleConAddresses = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -159,11 +154,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 7.0f));
 
                 networkActivityDialog.dismiss();
-                EspressoIdlingResource.decrement();
 
             }
         }
     };
+*/
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -207,8 +202,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
-    @VisibleForTesting
-    public IdlingResource getCountingIdlingResource() {
-        return EspressoIdlingResource.getIdlingResource();
+    @Override
+    public void mapConvention(Convention convention) {
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(convention.getLatitude(), convention.getLongitude()))
+                .title(convention.getName())
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.comicconicon))
+                .snippet(convention.getWebsite()));
+
+    }
+
+    @Override
+    public void completeMap() {
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 7.0f));
+
+        networkActivityDialog.dismiss();
+
     }
 }

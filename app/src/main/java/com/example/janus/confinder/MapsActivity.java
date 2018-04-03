@@ -5,11 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Geocoder;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
-import android.support.annotation.VisibleForTesting;
-import android.support.test.espresso.IdlingResource;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -20,6 +15,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.janus.confinder.data.Convention;
+import com.example.janus.confinder.data.ConventionsAPI;
+import com.example.janus.confinder.data.ConventionsDataSource;
+import com.example.janus.confinder.data.ConventionsRepository;
+import com.example.janus.confinder.data.RemoteConventionsAPI;
+import com.example.janus.confinder.data.RemoteConventionsDataSource;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,14 +30,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-// This app reads in data for upcoming Comic Cons across the world and displays them on a Google Maps API.
+// This is a toy app that I wrote to experiment with Google Maps.The app
+// reads in data for upcoming Comic Cons across the world and displays them on a Google Maps API.
 // Then it zooms in on the user's location (currently hard coded to Boston because I live near Boston : -)
 // It gets the Comic Con data from a REST API that is consumed using Retrofit.
 
 // TODO Get Location From User
-
-// TODO Either move the Retrofit call to a separate HandlerThread and then call the Geocoder in a different HandlerThread or
-// TODO set up the Retrofit call as an async and then call Gecoder in a HandlerThread from the callback. Undecided which way to go.
 
 public class MapsActivity extends FragmentActivity implements ConventionFinderContract.View, OnMapReadyCallback  {
 
@@ -55,14 +54,18 @@ public class MapsActivity extends FragmentActivity implements ConventionFinderCo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        ConventionsAPI conventionsAPI = new RemoteConventionsAPI();
+        ConventionsDataSource conventionsDataSource = new RemoteConventionsDataSource(conventionsAPI);
+        ConventionsDataSource conventionsRepository = new ConventionsRepository(conventionsDataSource);
+
         conventionFinderPresenter = new ConventionFinderPresenter(this,
-                new RetrofitConsFromWeb(getString(R.string.convention_search_url)),
+                conventionsRepository,
                 new Geocoder(this));
 
         setupStartSearchDialog();
 
 // Set up the dialog box for network activity
-        setupNetworkActivityDialog();
+        networkActivityDialog = DisplayFormattedMessages.showNetworkActivityAlert(this.getLayoutInflater(), this);
 
 // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -90,20 +93,6 @@ public class MapsActivity extends FragmentActivity implements ConventionFinderCo
         searchForCons();
     }
 
-// Method for setting up the network busy message
-    private void setupNetworkActivityDialog() {
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View dialogView = inflater.inflate(R.layout.busy_dialog, null);
-
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this)
-                .setCancelable(false)
-                .setView(dialogView);
-
-        networkActivityDialog = alertDialogBuilder.create();
-
-    }
-
 // Method for setting up the start search button
     private void setupStartSearchDialog() {
 
@@ -129,36 +118,6 @@ public class MapsActivity extends FragmentActivity implements ConventionFinderCo
         startSearchAlertDialog.show();
 
     }
-
-// This handles results from the REST call. The thread will send back a null object when it is done.
-// So that triggers the zoom functionality. Otherwise, take the geolocation and set a map marker. The thread sends
-// back one Convention object at a time.
-/*
-    Handler handleConAddresses = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-
-            if (msg.obj != null) {
-
-                Convention convention = (Convention) msg.obj;
-
-                mMap.addMarker(new MarkerOptions()
-                        .position(new LatLng(convention.getLatitude(), convention.getLongitude()))
-                        .title(convention.getName())
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.comicconicon))
-                        .snippet(convention.getWebsite()));
-
-            } else {
-
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 7.0f));
-
-                networkActivityDialog.dismiss();
-
-            }
-        }
-    };
-*/
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -220,6 +179,12 @@ public class MapsActivity extends FragmentActivity implements ConventionFinderCo
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 7.0f));
 
         networkActivityDialog.dismiss();
+
+    }
+
+    @Override
+    public void displayNetworkError() {
+        DisplayFormattedMessages.displayErrorMessageAlertDialog(getString(R.string.network_error_message), this, this);
 
     }
 }

@@ -1,4 +1,4 @@
-package com.example.janus.confinder;
+package com.example.janus.confinder.data;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

@@ -1,5 +1,7 @@
 package com.example.janus.confinder;
 
+import com.example.janus.confinder.data.Convention;
+import com.example.janus.confinder.data.RemoteConventionsAPI;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 
@@ -28,7 +30,7 @@ public class RetrofitUnitTest {
 
         mockWebServer.enqueue(new MockResponse().setBody(""));
 
-        RetrofitConsFromWeb retrofitConsFromWeb = new RetrofitConsFromWeb(mockWebServer.url("").toString());
+        RemoteConventionsAPI retrofitConsFromWeb = new RemoteConventionsAPI(mockWebServer.url("").toString());
         List<Convention> conventionsFromWeb = retrofitConsFromWeb.getConventionsFromWeb();
 
         assertEquals(null, conventionsFromWeb);
@@ -40,7 +42,7 @@ public class RetrofitUnitTest {
 
         mockWebServer.enqueue(new MockResponse().setBody(retroFiteResponse));
 
-        RetrofitConsFromWeb retrofitConsFromWeb = new RetrofitConsFromWeb(mockWebServer.url("").toString());
+        RemoteConventionsAPI retrofitConsFromWeb = new RemoteConventionsAPI(mockWebServer.url("").toString());
         List<Convention> conventionsFromWeb = retrofitConsFromWeb.getConventionsFromWeb();
         Convention oneConvention = conventionsFromWeb.get(0);
 

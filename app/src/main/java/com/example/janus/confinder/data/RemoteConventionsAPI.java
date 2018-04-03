@@ -1,6 +1,4 @@
-package com.example.janus.confinder;
-
-import android.util.Log;
+package com.example.janus.confinder.data;
 
 import java.io.IOException;
 import java.util.List;
@@ -10,12 +8,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 
-public class RetrofitConsFromWeb implements GetConventions {
+public class RemoteConventionsAPI implements ConventionsAPI {
 
-    private String jsonBaseURL;
+    private String jsonBaseURL = "http://www.januscole.com";
 
-    public RetrofitConsFromWeb(String jsonBaseURL) {
-        this.jsonBaseURL = jsonBaseURL;
+    public interface ConventionsWebAPI {
+
+        @GET("/cons")
+        Call<List<Convention>> getConventions();
+
     }
 
     @Override
@@ -26,7 +27,7 @@ public class RetrofitConsFromWeb implements GetConventions {
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = retrofitBuilder.build();
-        ConsFromWeb stockQuoteClient = retrofit.create(ConsFromWeb.class);
+        ConventionsWebAPI stockQuoteClient = retrofit.create(ConventionsWebAPI.class);
 
         Call<List<Convention>> conventionResults = stockQuoteClient.getConventions();
 
@@ -36,8 +37,6 @@ public class RetrofitConsFromWeb implements GetConventions {
             conventionList =  conventionResults.execute().body();
 
         } catch (IOException e) {
-// TODO Need to handle Retrofit errors elegantly. At present, the map will be blank if there is an IO Error.
-// TODO That works-ish, but it would be better with a more helpful error message.
         }
 
         return conventionList;

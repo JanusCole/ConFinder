@@ -2,9 +2,9 @@ package com.example.janus.confinder;
 
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
+
+import com.example.janus.confinder.data.Convention;
+import com.example.janus.confinder.data.ConventionsDataSource;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -15,58 +15,57 @@ public class ConventionFinderPresenter implements ConventionFinderContract.Prese
 
         ConventionFinderContract.View conventionFinderView;
         Geocoder geocoder;
-        GetConventions consFromWeb;
+        ConventionsDataSource conventionsDataSource;
 
-        public ConventionFinderPresenter(ConventionFinderContract.View conventionFinderView, GetConventions consFromWeb, Geocoder geocoder) {
+        public ConventionFinderPresenter(ConventionFinderContract.View conventionFinderView, ConventionsDataSource conventionsDataSource, Geocoder geocoder) {
             this.conventionFinderView = conventionFinderView;
-            this.consFromWeb = consFromWeb;
+            this.conventionsDataSource = conventionsDataSource;
             this.geocoder = geocoder;
         }
 
         public void getConventions() {
 
-            new SearchForConventions().execute();
+            conventionsDataSource.getConventions(new ConventionsDataSource.ConventionsDataSourceCallback() {
+                @Override
+                public void onConventionsComplete(List<Convention> conventions) {
 
-        }
+                    Calendar calendar = Calendar.getInstance();
+                    SimpleDateFormat mdformat = new SimpleDateFormat("yyyy-MM-dd ");
+                    String strDate = mdformat.format(calendar.getTime());
 
-    private class SearchForConventions extends AsyncTask<Void, Convention, Void> {
-        @Override
-        protected void onProgressUpdate(Convention... values) {
-            conventionFinderView.mapConvention(values[0]);
-        }
+                    for (int conventionIndex = 0;conventionIndex < conventions.size();conventionIndex++) {
 
-        @Override
-        protected Void doInBackground(Void... params) {
+                        Convention convention = conventions.get(conventionIndex);
 
-            Calendar calendar = Calendar.getInstance();
-            SimpleDateFormat mdformat = new SimpleDateFormat("yyyy-MM-dd ");
-            String strDate = mdformat.format(calendar.getTime());
+                        if (convention.getStartDate().compareTo(strDate) > 0) {
 
-            for (Convention convention: consFromWeb.getConventionsFromWeb()) {
+                            List<Address> addresses = null;
+                            try {
+                                addresses = geocoder.getFromLocationName(convention.getAddress(), 1);
+                            } catch (IOException e) {
+                                conventionFinderView.displayNetworkError();
+                            }
 
-                if (convention.getStartDate().compareTo(strDate) > 0) {
+                            if (addresses.size() > 0) {
+                                convention.setLongitude(addresses.get(0).getLongitude());
+                                convention.setLatitude(addresses.get(0).getLatitude());
 
-                    try {
-                        List<Address> addresses = geocoder.getFromLocationName(convention.getAddress(), 1);
+                                conventionFinderView.mapConvention(convention);
+                            }
 
-                        if (addresses.size() > 0) {
-                            convention.setLongitude(addresses.get(0).getLongitude());
-                            convention.setLatitude(addresses.get(0).getLatitude());
-
-                            publishProgress(convention);
                         }
-
-                    } catch (IOException e) {
                     }
-                }
-            }
-            return null;
-        }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            conventionFinderView.completeMap();
+                    conventionFinderView.completeMap();
+
+                }
+
+                @Override
+                public void onNetworkError() {
+                    conventionFinderView.displayNetworkError();
+                }
+            });
+
         }
-    }
 
 }

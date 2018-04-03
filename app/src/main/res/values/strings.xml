@@ -4,4 +4,5 @@
     <string name="convention_search_url">http://www.januscole.com</string>
     <string name="get_cons">GetCons</string>
     <string name="tilda_delimiter">~</string>
+    <string name="network_error_message">Network Error</string>
 </resources>

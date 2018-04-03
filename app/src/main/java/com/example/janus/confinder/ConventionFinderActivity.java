@@ -21,6 +21,7 @@ import com.example.janus.confinder.data.ConventionsDataSource;
 import com.example.janus.confinder.data.ConventionsRepository;
 import com.example.janus.confinder.data.RemoteConventionsAPI;
 import com.example.janus.confinder.data.RemoteConventionsDataSource;
+import com.example.janus.confinder.util.DisplayFormattedMessages;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -37,7 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 // TODO Get Location From User
 
-public class MapsActivity extends FragmentActivity implements ConventionFinderContract.View, OnMapReadyCallback  {
+public class ConventionFinderActivity extends FragmentActivity implements ConventionFinderContract.View, OnMapReadyCallback  {
 
     ConventionFinderContract.Presenter conventionFinderPresenter;
 

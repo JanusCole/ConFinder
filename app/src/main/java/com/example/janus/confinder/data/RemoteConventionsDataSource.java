@@ -20,7 +20,7 @@ public class RemoteConventionsDataSource implements ConventionsDataSource {
             @Override
             protected List<Convention> doInBackground(Void... params) {
 
-                List<Convention> conventions = consFromWeb.getConventionsFromWeb();
+                List<Convention> conventions = consFromWeb.getConventions();
 
                 return conventions;
             }

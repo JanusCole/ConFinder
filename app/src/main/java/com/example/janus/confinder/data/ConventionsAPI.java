@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface ConventionsAPI {
 
-    List<Convention> getConventionsFromWeb();
+    List<Convention> getConventions();
 
 }

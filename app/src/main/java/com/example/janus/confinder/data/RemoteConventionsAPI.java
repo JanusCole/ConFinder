@@ -20,7 +20,7 @@ public class RemoteConventionsAPI implements ConventionsAPI {
     }
 
     @Override
-    public List<Convention> getConventionsFromWeb() {
+    public List<Convention> getConventions() {
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .baseUrl(jsonBaseURL)

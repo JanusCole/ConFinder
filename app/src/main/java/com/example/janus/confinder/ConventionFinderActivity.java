@@ -1,5 +1,7 @@
 package com.example.janus.confinder;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,7 +23,6 @@ import com.example.janus.confinder.data.ConventionsDataSource;
 import com.example.janus.confinder.data.ConventionsRepository;
 import com.example.janus.confinder.data.RemoteConventionsAPI;
 import com.example.janus.confinder.data.RemoteConventionsDataSource;
-import com.example.janus.confinder.util.DisplayFormattedMessages;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -66,7 +67,7 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
         setupStartSearchDialog();
 
 // Set up the dialog box for network activity
-        networkActivityDialog = DisplayFormattedMessages.showNetworkActivityAlert(this.getLayoutInflater(), this);
+        networkActivityDialog = showNetworkActivityAlert(this.getLayoutInflater(), this);
 
 // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -162,6 +163,46 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
 
     }
 
+    public void displayErrorMessageAlertDialog(String alertMessage, Activity activity, Context context) {
+
+        LayoutInflater inflater = activity.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.custom_alert_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+                .setCancelable(false)
+                .setView(dialogView);
+
+        TextView alertDialogMessage = (TextView) dialogView.findViewById(R.id.messageTextView_AlertDialog);
+        alertDialogMessage.setText(alertMessage);
+
+        final AlertDialog errorMessageAlertDialog = alertDialogBuilder.create();
+        errorMessageAlertDialog.setCanceledOnTouchOutside(true);
+
+        Button dialogButton = (Button) dialogView.findViewById(R.id.okButton_AlertDialog);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                errorMessageAlertDialog.dismiss();
+            }
+        });
+
+        errorMessageAlertDialog.show();
+    }
+
+    // Method for setting up the network busy message
+    public AlertDialog showNetworkActivityAlert(LayoutInflater inflater,Context context) {
+
+        View dialogView = inflater.inflate(R.layout.busy_dialog, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(context)
+                .setCancelable(false)
+                .setView(dialogView);
+
+        return alertDialogBuilder.create();
+
+    }
+
+
     @Override
     public void mapConvention(Convention convention) {
 
@@ -185,7 +226,7 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
 
     @Override
     public void displayNetworkError() {
-        DisplayFormattedMessages.displayErrorMessageAlertDialog(getString(R.string.network_error_message), this, this);
+        displayErrorMessageAlertDialog(getString(R.string.network_error_message), this, this);
 
     }
 }

@@ -1,5 +1,7 @@
 package com.example.janus.confinder.data;
 
+import android.support.annotation.VisibleForTesting;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -10,7 +12,7 @@ import retrofit2.http.GET;
 
 public class RemoteConventionsAPI implements ConventionsAPI {
 
-    private String jsonBaseURL = "http://www.januscole.com";
+    private String baseURL = "http://www.januscole.com";
 
     public interface ConventionsWebAPI {
 
@@ -23,7 +25,7 @@ public class RemoteConventionsAPI implements ConventionsAPI {
     public List<Convention> getConventions() {
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
-                .baseUrl(jsonBaseURL)
+                .baseUrl(baseURL)
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = retrofitBuilder.build();
@@ -42,4 +44,11 @@ public class RemoteConventionsAPI implements ConventionsAPI {
         return conventionList;
 
     }
+
+    @VisibleForTesting
+    public void setBaseURL (String baseURL) {
+        this.baseURL = baseURL;
+    }
+
+
 }

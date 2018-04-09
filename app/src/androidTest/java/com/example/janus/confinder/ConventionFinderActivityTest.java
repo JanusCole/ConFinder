@@ -26,7 +26,7 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 
 
 @RunWith(AndroidJUnit4.class)
-public class ActivityMainTest {
+public class ConventionFinderActivityTest {
 
     @Rule
     public ActivityTestRule<ConventionFinderActivity> mActivityRule = new ActivityTestRule<>(

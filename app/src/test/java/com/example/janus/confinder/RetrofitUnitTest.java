@@ -30,7 +30,8 @@ public class RetrofitUnitTest {
 
         mockWebServer.enqueue(new MockResponse().setBody(""));
 
-        RemoteConventionsAPI retrofitConsFromWeb = new RemoteConventionsAPI(mockWebServer.url("").toString());
+        RemoteConventionsAPI retrofitConsFromWeb = new RemoteConventionsAPI();
+        retrofitConsFromWeb.setBaseURL(mockWebServer.url("").toString());
         List<Convention> conventionsFromWeb = retrofitConsFromWeb.getConventions();
 
         assertEquals(null, conventionsFromWeb);
@@ -42,7 +43,8 @@ public class RetrofitUnitTest {
 
         mockWebServer.enqueue(new MockResponse().setBody(retroFiteResponse));
 
-        RemoteConventionsAPI retrofitConsFromWeb = new RemoteConventionsAPI(mockWebServer.url("").toString());
+        RemoteConventionsAPI retrofitConsFromWeb = new RemoteConventionsAPI();
+        retrofitConsFromWeb.setBaseURL(mockWebServer.url("").toString());
         List<Convention> conventionsFromWeb = retrofitConsFromWeb.getConventions();
         Convention oneConvention = conventionsFromWeb.get(0);
 

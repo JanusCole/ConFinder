@@ -18,11 +18,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.janus.confinder.data.Convention;
-import com.example.janus.confinder.data.ConventionsAPI;
-import com.example.janus.confinder.data.ConventionsDataSource;
-import com.example.janus.confinder.data.ConventionsRepository;
-import com.example.janus.confinder.data.RemoteConventionsAPI;
-import com.example.janus.confinder.data.RemoteConventionsDataSource;
+import com.example.janus.confinder.data.ConventionsService;
+import com.example.janus.confinder.data.ConventionsServiceImplementation;
+import com.example.janus.confinder.data.ConventionsWebAPI;
+import com.example.janus.confinder.data.RemoteConventionsService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,7 +40,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class ConventionFinderActivity extends FragmentActivity implements ConventionFinderContract.View, OnMapReadyCallback  {
 
-    ConventionFinderContract.Presenter conventionFinderPresenter;
+    private ConventionFinderContract.Presenter conventionFinderPresenter;
 
     private GoogleMap mMap;
 
@@ -56,9 +55,9 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        ConventionsAPI conventionsAPI = new RemoteConventionsAPI();
-        ConventionsDataSource conventionsDataSource = new RemoteConventionsDataSource(conventionsAPI);
-        ConventionsDataSource conventionsRepository = new ConventionsRepository(conventionsDataSource);
+        ConventionsService conventionsAPI = new ConventionsWebAPI();
+        ConventionsService conventionsDataSource = new RemoteConventionsService(conventionsAPI);
+        ConventionsService conventionsRepository = new ConventionsServiceImplementation(conventionsDataSource);
 
         conventionFinderPresenter = new ConventionFinderPresenter(this,
                 conventionsRepository,

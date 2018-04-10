@@ -10,11 +10,11 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 
-public class RemoteConventionsAPI implements ConventionsAPI {
+public class ConventionsWebAPI implements ConventionsService {
 
     private String baseURL = "http://www.januscole.com";
 
-    public interface ConventionsWebAPI {
+    public interface ConventionsInterface {
 
         @GET("/cons")
         Call<List<Convention>> getConventions();
@@ -22,14 +22,14 @@ public class RemoteConventionsAPI implements ConventionsAPI {
     }
 
     @Override
-    public List<Convention> getConventions() {
+    public void getConventions(ConventionsDataSourceCallback conventionsDataSourceCallback) {
 
         Retrofit.Builder retrofitBuilder = new Retrofit.Builder()
                 .baseUrl(baseURL)
                 .addConverterFactory(GsonConverterFactory.create());
 
         Retrofit retrofit = retrofitBuilder.build();
-        ConventionsWebAPI stockQuoteClient = retrofit.create(ConventionsWebAPI.class);
+        ConventionsInterface stockQuoteClient = retrofit.create(ConventionsInterface.class);
 
         Call<List<Convention>> conventionResults = stockQuoteClient.getConventions();
 
@@ -37,11 +37,11 @@ public class RemoteConventionsAPI implements ConventionsAPI {
 
         try {
             conventionList =  conventionResults.execute().body();
+            conventionsDataSourceCallback.onConventionsComplete(conventionList);
 
         } catch (IOException e) {
+            conventionsDataSourceCallback.onNetworkError();
         }
-
-        return conventionList;
 
     }
 

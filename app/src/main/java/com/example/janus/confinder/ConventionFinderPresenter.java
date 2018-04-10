@@ -4,7 +4,7 @@ import android.location.Address;
 import android.location.Geocoder;
 
 import com.example.janus.confinder.data.Convention;
-import com.example.janus.confinder.data.ConventionsDataSource;
+import com.example.janus.confinder.data.ConventionsService;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -13,11 +13,11 @@ import java.util.List;
 
 public class ConventionFinderPresenter implements ConventionFinderContract.Presenter {
 
-        ConventionFinderContract.View conventionFinderView;
-        Geocoder geocoder;
-        ConventionsDataSource conventionsDataSource;
+        private ConventionFinderContract.View conventionFinderView;
+        private Geocoder geocoder;
+        private ConventionsService conventionsDataSource;
 
-        public ConventionFinderPresenter(ConventionFinderContract.View conventionFinderView, ConventionsDataSource conventionsDataSource, Geocoder geocoder) {
+        public ConventionFinderPresenter(ConventionFinderContract.View conventionFinderView, ConventionsService conventionsDataSource, Geocoder geocoder) {
             this.conventionFinderView = conventionFinderView;
             this.conventionsDataSource = conventionsDataSource;
             this.geocoder = geocoder;
@@ -25,7 +25,7 @@ public class ConventionFinderPresenter implements ConventionFinderContract.Prese
 
         public void getConventions() {
 
-            conventionsDataSource.getConventions(new ConventionsDataSource.ConventionsDataSourceCallback() {
+            conventionsDataSource.getConventions(new ConventionsService.ConventionsDataSourceCallback() {
                 @Override
                 public void onConventionsComplete(List<Convention> conventions) {
 

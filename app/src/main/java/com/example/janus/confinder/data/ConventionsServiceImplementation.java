@@ -2,18 +2,18 @@ package com.example.janus.confinder.data;
 
 import java.util.List;
 
-public class ConventionsRepository implements ConventionsDataSource {
+public class ConventionsServiceImplementation implements ConventionsService {
 
-    ConventionsDataSource conventionsDataSource;
+        private ConventionsService conventionsService;
 
-        public ConventionsRepository(ConventionsDataSource conventionsDataSource) {
-            this.conventionsDataSource = conventionsDataSource;
+        public ConventionsServiceImplementation(ConventionsService conventionsService) {
+            this.conventionsService = conventionsService;
         }
 
         @Override
         public void getConventions(final ConventionsDataSourceCallback conventionsDataSourceCallback) {
 
-            conventionsDataSource.getConventions(new ConventionsDataSourceCallback() {
+            conventionsService.getConventions(new ConventionsDataSourceCallback() {
                 @Override
                 public void onConventionsComplete(List<Convention> conventions) {
                     conventionsDataSourceCallback.onConventionsComplete(conventions);

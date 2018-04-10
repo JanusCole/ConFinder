@@ -4,9 +4,9 @@ import com.example.janus.confinder.data.Convention;
 
 import java.util.List;
 
-public interface ConventionsDataSource {
+public interface ConventionsService {
 
-    public interface ConventionsDataSourceCallback {
+    interface ConventionsDataSourceCallback {
         void onConventionsComplete(List<Convention> conventions);
         void onNetworkError();
     }

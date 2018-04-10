@@ -3,7 +3,7 @@ package com.example.janus.confinder;
 import android.location.Geocoder;
 
 import com.example.janus.confinder.data.Convention;
-import com.example.janus.confinder.data.ConventionsDataSource;
+import com.example.janus.confinder.data.ConventionsService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,7 +32,7 @@ public class ConventionFinderPresenterUnitTest {
     private ConventionFinderContract.View mockConventionFinderView;
 
     @Mock
-    private ConventionsDataSource mockConventionsDataSource;
+    private ConventionsService mockConventionsDataSource;
 
     @Mock
     private Geocoder mockGeocoder;
@@ -55,8 +55,8 @@ public class ConventionFinderPresenterUnitTest {
 
         conventionFinder.getConventions();
 
-        ArgumentCaptor<ConventionsDataSource.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
-                ArgumentCaptor.forClass(ConventionsDataSource.ConventionsDataSourceCallback.class);
+        ArgumentCaptor<ConventionsService.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionsService.ConventionsDataSourceCallback.class);
 
         verify(mockConventionsDataSource).getConventions(mGetConventionsCallbackCaptor.capture());
         mGetConventionsCallbackCaptor.getValue().onConventionsComplete(new ArrayList<Convention>());
@@ -70,8 +70,8 @@ public class ConventionFinderPresenterUnitTest {
 
         conventionFinder.getConventions();
 
-        ArgumentCaptor<ConventionsDataSource.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
-                ArgumentCaptor.forClass(ConventionsDataSource.ConventionsDataSourceCallback.class);
+        ArgumentCaptor<ConventionsService.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionsService.ConventionsDataSourceCallback.class);
 
         verify(mockConventionsDataSource).getConventions(mGetConventionsCallbackCaptor.capture());
         mGetConventionsCallbackCaptor.getValue().onNetworkError();
@@ -86,8 +86,8 @@ public class ConventionFinderPresenterUnitTest {
 
         conventionFinder.getConventions();
 
-        ArgumentCaptor<ConventionsDataSource.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
-                ArgumentCaptor.forClass(ConventionsDataSource.ConventionsDataSourceCallback.class);
+        ArgumentCaptor<ConventionsService.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionsService.ConventionsDataSourceCallback.class);
 
         verify(mockConventionsDataSource).getConventions(mGetConventionsCallbackCaptor.capture());
         mGetConventionsCallbackCaptor.getValue().onConventionsComplete(new ArrayList<Convention>(1));

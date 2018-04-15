@@ -4,7 +4,9 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 
-public  class Convention {
+// This is the convention event object obtained from the web
+
+public  class ConventionEvent {
 
     @SerializedName("name")
     private String name;
@@ -38,13 +40,7 @@ public  class Convention {
             private String addressCountry;
 
         }
-
     }
-
-    private Double latitude;
-
-    private Double longitude;
-
 
     public String getStartDate() {
         return startDate;
@@ -58,29 +54,9 @@ public  class Convention {
         return website;
     }
 
-    public void setName (String name) {
-        this.name = name;
-    }
-
     public String getAddress() {
         return location.address.addressLocality + ", " +
                 location.address.addressCountry;
-    }
-
-    public Double getLatitude () {
-        return latitude;
-    }
-
-    public Double getLongitude () {
-        return longitude;
-    }
-
-    public void setLatitude (Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public void setLongitude (Double longitude) {
-        this.longitude = longitude;
     }
 
 }

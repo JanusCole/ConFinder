@@ -29,8 +29,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.withText;
 public class ConventionFinderActivityTest {
 
     @Rule
-    public ActivityTestRule<ConventionFinderActivity> mActivityRule = new ActivityTestRule<>(
-            ConventionFinderActivity.class);
+    public ActivityTestRule<ConventionMapperActivity> mActivityRule = new ActivityTestRule<>(
+            ConventionMapperActivity.class);
 
     @Before
     public void setUp() throws Exception {

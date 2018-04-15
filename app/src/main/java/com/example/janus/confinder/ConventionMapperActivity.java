@@ -17,11 +17,10 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.janus.confinder.data.Convention;
-import com.example.janus.confinder.data.ConventionsService;
-import com.example.janus.confinder.data.ConventionsServiceImplementation;
-import com.example.janus.confinder.data.ConventionsWebAPI;
-import com.example.janus.confinder.data.RemoteConventionsService;
+import com.example.janus.confinder.data.ConventionLocation;
+import com.example.janus.confinder.data.ConventionsEventService;
+import com.example.janus.confinder.data.ConventionsLocator;
+import com.example.janus.confinder.data.RemoteConventionsEventService;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -31,16 +30,15 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-// This is a toy app that I wrote to experiment with Google Maps.The app
-// reads in data for upcoming Comic Cons across the world and displays them on a Google Maps API.
+// This app reads in data for upcoming Comic Cons across the world and displays them on a Google Maps API.
 // Then it zooms in on the user's location (currently hard coded to Boston because I live near Boston : -)
 // It gets the Comic Con data from a REST API that is consumed using Retrofit.
 
 // TODO Get Location From User
 
-public class ConventionFinderActivity extends FragmentActivity implements ConventionFinderContract.View, OnMapReadyCallback  {
+public class ConventionMapperActivity extends FragmentActivity implements ConventionMapperContract.View, OnMapReadyCallback  {
 
-    private ConventionFinderContract.Presenter conventionFinderPresenter;
+    private ConventionMapperContract.Presenter conventionFinderPresenter;
 
     private GoogleMap mMap;
 
@@ -55,13 +53,17 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
-        ConventionsService conventionsAPI = new ConventionsWebAPI();
-        ConventionsService conventionsDataSource = new RemoteConventionsService(conventionsAPI);
-        ConventionsService conventionsRepository = new ConventionsServiceImplementation(conventionsDataSource);
 
-        conventionFinderPresenter = new ConventionFinderPresenter(this,
-                conventionsRepository,
-                new Geocoder(this));
+// Create the service that will provide convention events
+        ConventionsEventService conventionsWebClient = new RemoteConventionsEventService();
+
+// Create the service that will provide convention locations
+        ConventionsLocator conventionsLocator = new ConventionsLocator(new Geocoder(this));
+
+// Create the presenter and provide it with a source of convention events and a Geolocato
+        conventionFinderPresenter = new ConventionMapperPresenter(this,
+                conventionsWebClient,
+                conventionsLocator);
 
         setupStartSearchDialog();
 
@@ -84,7 +86,7 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
         mMap.moveCamera(CameraUpdateFactory.newLatLng(USA_LOCATION));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(USA_LOCATION, 4.0f));
 
-        conventionFinderPresenter.getConventions();
+        conventionFinderPresenter.mapConventions();
 
     }
 
@@ -120,6 +122,7 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
 
     }
 
+// Configure the map
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
@@ -162,6 +165,37 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
 
     }
 
+
+// Places a convention on the map
+    @Override
+    public void mapConvention(ConventionLocation conventionLocation) {
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(conventionLocation.getLatitude(), conventionLocation.getLongitude()))
+                .title(conventionLocation.getName())
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.comicconicon))
+                .snippet(conventionLocation.getWebsite()));
+
+    }
+
+// Performs the zoom animation to the user's location
+    @Override
+    public void completeMap() {
+
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 7.0f));
+
+        networkActivityDialog.dismiss();
+
+    }
+
+    @Override
+    public void displayNetworkError() {
+        displayErrorMessageAlertDialog(getString(R.string.network_error_message), this, this);
+
+    }
+
+// Methods for displaying formatted messages
     public void displayErrorMessageAlertDialog(String alertMessage, Activity activity, Context context) {
 
         LayoutInflater inflater = activity.getLayoutInflater();
@@ -202,30 +236,4 @@ public class ConventionFinderActivity extends FragmentActivity implements Conven
     }
 
 
-    @Override
-    public void mapConvention(Convention convention) {
-
-        mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(convention.getLatitude(), convention.getLongitude()))
-                .title(convention.getName())
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.comicconicon))
-                .snippet(convention.getWebsite()));
-
-    }
-
-    @Override
-    public void completeMap() {
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(userLocation));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 7.0f));
-
-        networkActivityDialog.dismiss();
-
-    }
-
-    @Override
-    public void displayNetworkError() {
-        displayErrorMessageAlertDialog(getString(R.string.network_error_message), this, this);
-
-    }
 }

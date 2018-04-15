@@ -34,7 +34,7 @@
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="900dp"
-            tools:context=".ConventionFinderActivity" />
+            tools:context=".ConventionMapperActivity" />
 
     </LinearLayout>
 

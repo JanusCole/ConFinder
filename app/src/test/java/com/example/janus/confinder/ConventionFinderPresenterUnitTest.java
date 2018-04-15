@@ -1,9 +1,9 @@
 package com.example.janus.confinder;
 
-import android.location.Geocoder;
-
-import com.example.janus.confinder.data.Convention;
-import com.example.janus.confinder.data.ConventionsService;
+import com.example.janus.confinder.data.ConventionEvent;
+import com.example.janus.confinder.data.ConventionLocation;
+import com.example.janus.confinder.data.ConventionLocatorService;
+import com.example.janus.confinder.data.ConventionsEventService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -15,7 +15,10 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import static org.junit.Assert.*;
+
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -26,54 +29,39 @@ public class ConventionFinderPresenterUnitTest {
     public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock
-    private Convention mockConvention;
+    private ConventionEvent mockConvention;
 
     @Mock
-    private ConventionFinderContract.View mockConventionFinderView;
+    private ConventionMapperContract.View mockConventionFinderView;
 
     @Mock
-    private ConventionsService mockConventionsDataSource;
+    private ConventionsEventService conventionsEventService;
 
     @Mock
-    private Geocoder mockGeocoder;
+    private ConventionLocatorService conventionLocatorService;
 
 
     // This is the Class under test
-    private ConventionFinderContract.Presenter conventionFinder;
+    private ConventionMapperContract.Presenter conventionMapperPresenter;
 
     @Before
     public void setUp() throws Exception {
 
         MockitoAnnotations.initMocks(this);
 
-        conventionFinder = new ConventionFinderPresenter(mockConventionFinderView, mockConventionsDataSource, mockGeocoder);
-
-    }
-
-    @Test
-    public void testGetConventionsNoneFound() throws Exception {
-
-        conventionFinder.getConventions();
-
-        ArgumentCaptor<ConventionsService.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
-                ArgumentCaptor.forClass(ConventionsService.ConventionsDataSourceCallback.class);
-
-        verify(mockConventionsDataSource).getConventions(mGetConventionsCallbackCaptor.capture());
-        mGetConventionsCallbackCaptor.getValue().onConventionsComplete(new ArrayList<Convention>());
-
-        verify(mockConventionFinderView).completeMap();
+        conventionMapperPresenter = new ConventionMapperPresenter(mockConventionFinderView, conventionsEventService, conventionLocatorService);
 
     }
 
     @Test
     public void testGetConventionsNetworkError() throws Exception {
 
-        conventionFinder.getConventions();
+        conventionMapperPresenter.mapConventions();
 
-        ArgumentCaptor<ConventionsService.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
-                ArgumentCaptor.forClass(ConventionsService.ConventionsDataSourceCallback.class);
+        ArgumentCaptor<ConventionsEventService.ConventionEventsCallback> mGetConventionsCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionsEventService.ConventionEventsCallback.class);
 
-        verify(mockConventionsDataSource).getConventions(mGetConventionsCallbackCaptor.capture());
+        verify(conventionsEventService).getConventionEvents(mGetConventionsCallbackCaptor.capture());
         mGetConventionsCallbackCaptor.getValue().onNetworkError();
 
         verify(mockConventionFinderView).displayNetworkError();
@@ -84,17 +72,110 @@ public class ConventionFinderPresenterUnitTest {
     @Test
     public void testGetConventionsOneFound() throws Exception {
 
-        conventionFinder.getConventions();
+        conventionMapperPresenter.mapConventions();
 
-        ArgumentCaptor<ConventionsService.ConventionsDataSourceCallback> mGetConventionsCallbackCaptor =
-                ArgumentCaptor.forClass(ConventionsService.ConventionsDataSourceCallback.class);
+        List<ConventionEvent> mockConventionEvents = new ArrayList<>();
+        mockConventionEvents.add(new ConventionEvent());
 
-        verify(mockConventionsDataSource).getConventions(mGetConventionsCallbackCaptor.capture());
-        mGetConventionsCallbackCaptor.getValue().onConventionsComplete(new ArrayList<Convention>(1));
+        ArgumentCaptor<ConventionsEventService.ConventionEventsCallback> conventionEventsCallbackArgumentCaptor =
+                ArgumentCaptor.forClass(ConventionsEventService.ConventionEventsCallback.class);
 
-        verify(mockConventionFinderView).mapConvention(any(Convention.class));
+        verify(conventionsEventService).getConventionEvents(conventionEventsCallbackArgumentCaptor.capture());
+        conventionEventsCallbackArgumentCaptor.getValue().onConventionsComplete(mockConventionEvents);
+
+        ConventionLocation mockConventionLocation = new ConventionLocation();
+
+        ArgumentCaptor<ConventionLocatorService.ConventionLocatorServiceCallback> mGetConventionLocationCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionLocatorService.ConventionLocatorServiceCallback.class);
+
+        ArgumentCaptor<List<ConventionEvent>> mConventionEventsCaptor =
+                ArgumentCaptor.forClass(List.class);
+
+        verify(conventionLocatorService).getConventionLocations(mConventionEventsCaptor.capture(), mGetConventionLocationCallbackCaptor.capture());
+        assertEquals(mockConventionEvents, mConventionEventsCaptor.getValue());
+
+        mGetConventionLocationCallbackCaptor.getValue().onConventionLocated(mockConventionLocation);
+
+        verify(mockConventionFinderView).mapConvention(any(ConventionLocation.class));
 
     }
+
+    @Test
+    public void testGetConventionsMapComplete() throws Exception {
+
+        conventionMapperPresenter.mapConventions();
+
+        List<ConventionEvent> mockConventionEvents = new ArrayList<>();
+        mockConventionEvents.add(new ConventionEvent());
+
+        ArgumentCaptor<ConventionsEventService.ConventionEventsCallback> conventionEventsCallbackArgumentCaptor =
+                ArgumentCaptor.forClass(ConventionsEventService.ConventionEventsCallback.class);
+
+        verify(conventionsEventService).getConventionEvents(conventionEventsCallbackArgumentCaptor.capture());
+        conventionEventsCallbackArgumentCaptor.getValue().onConventionsComplete(mockConventionEvents);
+
+        ArgumentCaptor<ConventionLocatorService.ConventionLocatorServiceCallback> mGetConventionLocationCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionLocatorService.ConventionLocatorServiceCallback.class);
+
+        ArgumentCaptor<List<ConventionEvent>> mConventionEventsCaptor =
+                ArgumentCaptor.forClass(List.class);
+
+        verify(conventionLocatorService).getConventionLocations(mConventionEventsCaptor.capture(), mGetConventionLocationCallbackCaptor.capture());
+        assertEquals(mockConventionEvents, mConventionEventsCaptor.getValue());
+
+        mGetConventionLocationCallbackCaptor.getValue().onConventionLocationsComplete();
+
+        verify(mockConventionFinderView).completeMap();
+
+    }
+
+    @Test
+    public void testGetConventionsEventError() throws Exception {
+
+        conventionMapperPresenter.mapConventions();
+
+        List<ConventionEvent> mockConventionEvents = new ArrayList<>();
+        mockConventionEvents.add(new ConventionEvent());
+
+        ArgumentCaptor<ConventionsEventService.ConventionEventsCallback> conventionEventsCallbackArgumentCaptor =
+                ArgumentCaptor.forClass(ConventionsEventService.ConventionEventsCallback.class);
+
+        verify(conventionsEventService).getConventionEvents(conventionEventsCallbackArgumentCaptor.capture());
+        conventionEventsCallbackArgumentCaptor.getValue().onNetworkError();
+
+        verify(mockConventionFinderView).displayNetworkError();
+
+    }
+
+    @Test
+    public void testGetConventionLocationsError() throws Exception {
+
+        conventionMapperPresenter.mapConventions();
+
+        List<ConventionEvent> mockConventionEvents = new ArrayList<>();
+        mockConventionEvents.add(new ConventionEvent());
+
+        ArgumentCaptor<ConventionsEventService.ConventionEventsCallback> conventionEventsCallbackArgumentCaptor =
+                ArgumentCaptor.forClass(ConventionsEventService.ConventionEventsCallback.class);
+
+        verify(conventionsEventService).getConventionEvents(conventionEventsCallbackArgumentCaptor.capture());
+        conventionEventsCallbackArgumentCaptor.getValue().onConventionsComplete(mockConventionEvents);
+
+        ArgumentCaptor<ConventionLocatorService.ConventionLocatorServiceCallback> mGetConventionLocationCallbackCaptor =
+                ArgumentCaptor.forClass(ConventionLocatorService.ConventionLocatorServiceCallback.class);
+
+        ArgumentCaptor<List<ConventionEvent>> mConventionEventsCaptor =
+                ArgumentCaptor.forClass(List.class);
+
+        verify(conventionLocatorService).getConventionLocations(mConventionEventsCaptor.capture(), mGetConventionLocationCallbackCaptor.capture());
+        assertEquals(mockConventionEvents, mConventionEventsCaptor.getValue());
+
+        mGetConventionLocationCallbackCaptor.getValue().onNetworkError();
+
+        verify(mockConventionFinderView).displayNetworkError();
+
+    }
+
 
 
     @After

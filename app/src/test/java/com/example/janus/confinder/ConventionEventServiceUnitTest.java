@@ -1,15 +1,14 @@
 package com.example.janus.confinder;
 
-import com.example.janus.confinder.data.Convention;
-import com.example.janus.confinder.data.ConventionsService;
-import com.example.janus.confinder.data.ConventionsWebAPI;
+import com.example.janus.confinder.data.ConventionEvent;
+import com.example.janus.confinder.data.ConventionsEventService;
+import com.example.janus.confinder.data.RemoteConventionsEventService;
 import com.squareup.okhttp.mockwebserver.MockResponse;
 import com.squareup.okhttp.mockwebserver.MockWebServer;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
@@ -17,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class ConventionsWebAPIUnitTest {
+public class ConventionEventServiceUnitTest {
 
     String retroFiteResponse = "[{\"@context\":\"http://schema.org/\",\"@type\":\"Event\",\"name\":\"Ikkicon\",\"startDate\":\"2018-12-29\",\"endDate\":\"2018-12-31\",\"url\":\"http://fancons.com/events/info.shtml/9192/Ikkicon_2018/\",\"location\":{\"@type\":\"Place\",\"name\":\"Renaissance Austin Hotel\",\"address\":{\"@type\":\"PostalAddress\",\"addressLocality\":\"Austin\",\"addressRegion\":\"TX\",\"postalCode\":\"78759\",\"addressCountry\":\"USA\"}}}]";
 
@@ -33,12 +32,12 @@ public class ConventionsWebAPIUnitTest {
 
         mockWebServer.enqueue(new MockResponse().setBody(""));
 
-        ConventionsWebAPI retrofitConsFromWeb = new ConventionsWebAPI();
+        RemoteConventionsEventService retrofitConsFromWeb = new RemoteConventionsEventService();
         retrofitConsFromWeb.setBaseURL(mockWebServer.url("").toString());
 
-        retrofitConsFromWeb.getConventions(new ConventionsService.ConventionsDataSourceCallback() {
+        retrofitConsFromWeb.getConventionEvents(new ConventionsEventService.ConventionEventsCallback() {
             @Override
-            public void onConventionsComplete(List<Convention> conventions) {
+            public void onConventionsComplete(List<ConventionEvent> conventions) {
                 assertTrue(false);
             }
 
@@ -55,12 +54,12 @@ public class ConventionsWebAPIUnitTest {
 
         mockWebServer.enqueue(new MockResponse().setBody(retroFiteResponse));
 
-        ConventionsWebAPI retrofitConsFromWeb = new ConventionsWebAPI();
+        RemoteConventionsEventService retrofitConsFromWeb = new RemoteConventionsEventService();
         retrofitConsFromWeb.setBaseURL(mockWebServer.url("").toString());
-        retrofitConsFromWeb.getConventions(new ConventionsService.ConventionsDataSourceCallback() {
+        retrofitConsFromWeb.getConventionEvents(new ConventionsEventService.ConventionEventsCallback() {
             @Override
-            public void onConventionsComplete(List<Convention> conventions) {
-                Convention oneConvention = conventions.get(0);
+            public void onConventionsComplete(List<ConventionEvent> conventions) {
+                ConventionEvent oneConvention = conventions.get(0);
 
                 assertFalse(oneConvention == null);
                 assertEquals("Ikkicon", oneConvention.getName());
